@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"hello-grpc/common"
-	pb "hello-grpc/protos"
+	"hello-grpc/protos"
 	"log"
 	"net"
 )
 
 // server is used to implement helloworld.GreeterServer.
-type Server struct{}
+type server struct{}
 
 // SayHello implements helloworld.GreeterServer
-func (s *Server) SayHello(context context.Context, in *pb.HelloRequest) (*pb.HelloResponse, error) {
+func (s *server) SayHello(context context.Context, in *protos.HelloRequest) (*protos.HelloResponse, error) {
 	log.Printf("Message received is: %v", in.Name)
-	return &pb.HelloResponse{Message: "Hello " + in.Name}, nil
+	return &protos.HelloResponse{Message: "Hello " + in.Name}, nil
 }
 func main() {
 	listen, err := net.Listen("tcp", common.GRPCPORT)
@@ -25,10 +25,12 @@ func main() {
 		return
 	}
 	grpcServer := grpc.NewServer()
-	pb.RegisterHelloWorldServer(grpcServer, &Server{})
+
+	//here we need to register a service
+	protos.RegisterHelloWorldServer(grpcServer, &server{})
 	//reflection.Register(grpcServer)
-	err = grpcServer.Serve(listen)
-	if err != nil {
+
+	if err := grpcServer.Serve(listen); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }
